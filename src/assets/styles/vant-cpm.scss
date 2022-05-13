@@ -1,0 +1,30 @@
+
+//覆盖vant颜色
+// #root{
+//     --van-green: #0ACB89;
+// }
+// 覆盖vant样式
+.van-pagination__item:nth-child(2) {
+    background-color: rgba(0, 0, 0, .3);
+    color: #fff;
+    font-size: 16px;
+    border-radius: 4px;
+}
+
+.van-pagination__item {
+    &:active {
+        background-color: rgba(0, 0, 0, 0.7) !important;
+    }
+}
+
+.van-dropdown-menu__item {
+    display: flex;
+    // background: $background-color;
+    flex: 1;
+    align-items: center;
+    justify-content: flex-start !important;
+    min-width: 0;
+  }
+  .van-dropdown-menu__bar{
+    box-shadow: none !important;
+  }

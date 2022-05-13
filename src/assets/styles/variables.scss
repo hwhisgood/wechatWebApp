@@ -1,0 +1,36 @@
+/* color */
+// $xsa-color-main: #0ACB89 ;
+
+
+/* font-size */
+$xsa-fontSize-lg:18px;
+$xsa-fontSize-md:16px;
+$xsa-fontSize-xs:14px;
+
+/* color */
+$xsa-color-default:#333; // 通用字体颜色
+
+
+/* background */
+$app-background-color: #f8f8f8;
+// $background-color: red;
+
+/* border */
+$border-width: 1px; // 边框大小
+$border-color: #EBEBEB; // 边框颜色
+$border-style: solid; // 边框颜色
+
+/* table专用 */
+$xsa-table-fontSize:14px;
+$xsa-table-color:#333;
+
+/* border 1px */
+@media screen and (-webkit-min-device-pixel-ratio: 2) {
+	$border-width: 0.5px !global;
+}
+
+@media screen and (-webkit-min-device-pixel-ratio: 3) {
+	$border-width: 0.3333px !global;
+}
+
+$border-default: $border-width $border-color $border-style;

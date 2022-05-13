@@ -1,0 +1,32 @@
+{
+  "name": "xinsec-dataReport-h5",
+  "version": "0.0.0",
+  "scripts": {
+    "dev": "vite --mode development",
+    "dev-pro": "vite --mode production",
+    "dev-expose": "vite --mode development --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --port 5050"
+  },
+  "dependencies": {
+    "amfe-flexible": "^2.2.1",
+    "autoprefixer": "^10.4.5",
+    "axios": "^0.26.1",
+    "fastclick": "^1.0.6",
+    "lodash": "^4.17.21",
+    "md5": "^2.3.0",
+    "pinia": "^2.0.13",
+    "postcss-pxtorem": "^6.0.0",
+    "qs": "^6.10.3",
+    "vant": "^3.4.7",
+    "vue": "^3.2.31",
+    "vue-router": "^4.0.14"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^2.3.1",
+    "sass": "^1.50.0",
+    "svg-sprite-loader": "^6.0.11",
+    "vite": "^2.9.1",
+    "vite-plugin-style-import": "1.4.1"
+  }
+}
