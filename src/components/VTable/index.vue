@@ -1,7 +1,7 @@
 <template>
-  <div class="v-table">
+  <div class="v-table" id="VTable" ref="VTable">
     <div class="v-header" :style="getHeaderWidth">
-      <div v-for="(item, index) in option.column" :key="index" class="v-header-item"
+      <div v-for="(item, index) in option.columns" :key="index" class="v-header-item"
         :style="{ width: (item.width || cellWidth) + 'px' }">
         <!-- :style="'width:' + item.width ? item.width : '' + 'px'" -->
         <span class="v-header-title">{{ item.label }}</span>
@@ -14,7 +14,7 @@
     <div class="scroll-content">
       <div class="v-content" :style="`width:${getHeaderWidth}px;height:${getContentHeight}px`">
         <div v-for="(item, index) in tableData" :key="index" class="v-content-block">
-          <div v-for="(context, i) in option.column" :key="i" class="v-content-item"
+          <div v-for="(context, i) in option.columns" :key="i" class="v-content-item"
             :style="{ width: (context.width || cellWidth) + 'px' }">
             {{ item[context.tableDataprop] }}
           </div>
@@ -25,9 +25,14 @@
 </template>
 
 <script setup name="VTableComponet">
-import { onMounted, watch } from "vue";
+import { onMounted, watch, ref } from "vue";
 import { computed } from "@vue/reactivity";
 import _ from "lodash";
+import waterMark from '@/plugins/waterMaker'
+import { useUserStore } from "@/stores/user";
+const userStore = useUserStore();
+
+const VTable = ref(null)
 const cellWidth = 120;
 const emits = defineEmits(["sortClick"]);
 const props = defineProps({
@@ -38,7 +43,7 @@ const props = defineProps({
   option: {
     type: Object,
     default: {
-      column: [
+      columns: [
         {
           label: "", // String
           props: "", // String
@@ -52,6 +57,7 @@ const props = defineProps({
 
 onMounted(() => {
   getHeaderWidth();
+  warterMakerInit();
 });
 
 const getContentHeight = computed(() => {
@@ -59,15 +65,37 @@ const getContentHeight = computed(() => {
   let height = _.multiply(props.tableData.length, 40);
   return height + 350
 })
-
+/**
+ * 水印初始化
+ */
+function warterMakerInit() {
+  waterMark.init(
+    {
+      parentDomName: '.v-content', // 父节点dom选择器名字
+      show: true, // 水印开关
+      color: 'rgba(0, 0, 0, 0.1)', // 水印色值
+      title: `${userStore.getUserName}(${userStore.getUserNo})`, // 显示的水印文本
+      width: 200, // 水印宽高
+      height: 150,
+      fontNum: 16, // 水印字体大小
+      rotate: -20, // 旋转角度
+      zIndex: 1,
+    }
+  )
+}
+/**
+ * 获取头部宽度
+ */
 function getHeaderWidth() {
-  let widthArray = props.option.column.map((item) => {
+  let widthArray = props.option.columns.map((item) => {
     return item.width ? item.width : cellWidth;
   });
   return `${_.sum(widthArray)}`;
 }
-
-
+/**
+ * 暴露头部点击时间
+ * @param {*} item 
+ */
 function onSortClick(item) {
   emits("sortClick", item);
 }

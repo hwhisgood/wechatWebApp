@@ -58,7 +58,7 @@ export default defineConfig(async ({ command, mode }) => {
       // proxy: createProxy(VITE_PROXY)
       proxy: {
         '/api': {
-          target: 'http://10.80.210.72',    // 后台服务地址
+          target: 'http://10.80.210.83',    // 后台服务地址
           changeOrigin: true, // 是否允许不同源
           secure: false,      // 支持https
           rewrite: path => path.replace(/^api/, '')

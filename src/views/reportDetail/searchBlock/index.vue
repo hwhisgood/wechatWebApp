@@ -10,7 +10,8 @@
         <div class='searchBlock'>
             <div class="search-form">
                 <div class="search-form-item" v-for="(item, i) in searchList" :key="i">
-                    <input v-model.trim="item.value" type="text" autocomplete="off" :placeholder="item.placeHolder" />
+                    <input v-model.trim="item.value" type="text" autocomplete="off"
+                        :placeholder="`请输入${item.conditionName}值`" />
                 </div>
             </div>
             <Button block type="success" @click="onSubmit" class="search-form-btn">{{ submitText }}</Button>

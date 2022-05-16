@@ -7,12 +7,18 @@
             :title="activeClassTitle" />
         </DropdownMenu>
       </div>
-      <Search v-model="searchValue" shape="round" background="#fff" placeholder="数据报表名称输入" class="header-search-input">
-      </Search>
+      <form action="/">
+        <Search v-model.trim="searchValue" shape="round" background="#fff" placeholder="数据报表名称输入"
+          class="header-search-input" @search="onSearch">
+        </Search>
+      </form>
     </div>
     <div class="content">
-      <CardItem v-for="item in reportList" :key="item.id" :cardName="item.text" @click="goReportDetailPage(item.id)">
-      </CardItem>
+      <List v-model:loading="isLoading" :finished="isFinished" finished-text="已经到底了" @load="onScrollRefresh">
+        <CardItem v-for="item in reportList" :key="item.id" :cardName="item.name" @click="goReportDetailPage(item.id)">
+        </CardItem>
+      </List>
+
       <Empty v-if="!reportList.length" mage-size="100" description="描述文字" />
     </div>
   </ConfigProvider>
@@ -21,18 +27,24 @@
 <script setup name="Home">
 import { onMounted, ref, watch, reactive, getCurrentInstance } from "vue";
 import { computed } from "@vue/reactivity";
-import { DropdownMenu, DropdownItem, Search, Empty, ConfigProvider } from "vant";
+import { DropdownMenu, DropdownItem, Search, Empty, ConfigProvider, List } from "vant";
 import CardItem from "./components/CardItem.vue";
 import { useRouter } from "vue-router";
 import $api from "@/api";
 const router = useRouter();
 const internalInstance = getCurrentInstance()
-
-let searchValue = ref("");      // 搜索key值
-let activeClassTitle = ref(""); // 当前分类文案
-let activeClass = ref(null);    // 当前分类选项
-let reportList = reactive([])   // 分类列表
-let reportClass = reactive([])  // 分类
+const searchValue = ref("");      // 搜索key值
+const activeClassTitle = ref(""); // 当前分类文案
+const activeClass = ref(null);    // 当前分类选项
+const total = ref(0)              // 总页数
+const reportList = reactive([])   // 分类列表
+const reportClass = reactive([])  // 分类
+const isLoading = ref(false);     // 上拉加载 loading
+const isFinished = ref(false);    // 上拉加载状态确认
+const pageInfo = reactive({
+  limit: 10,
+  size: 1
+})
 
 watch(
   () => activeClass.value,
@@ -41,6 +53,11 @@ watch(
     activeClassTitle.value = getActiveTitle(_index);
   }
 );
+
+function onSearch() {
+  pageInfo.size = 1;
+  getReportClassList(searchValue.value)
+}
 
 function getActiveIndex(val) {
   let _index;
@@ -65,7 +82,7 @@ const themeVars = {
  * 跳转到详情页
  */
 function goReportDetailPage(id) {
-  router.push({ path: "reportDetail" });
+  router.push({ path: "reportDetail", query: { id } });
 }
 
 /**
@@ -73,6 +90,13 @@ function goReportDetailPage(id) {
  */
 function onDropdownItemChange(val) {
   getReportClassList();
+}
+
+/**
+ *上拉加载
+ */
+function onScrollRefresh() {
+
 }
 
 /**
@@ -94,16 +118,23 @@ async function getReportClass() {
 /**
  * 获取报表分类
  */
-function getReportClassList() {
+function getReportClassList(name = "") {
   let obj = {
-    classfyId: activeClass.value,
+    classfyId: name ? "" : activeClass.value,
     isCondition: null,
-    name: null,
-    limit: 10,
-    page: 1,
+    name,
+    limit: pageInfo.limit,
+    page: pageInfo.size,
   }
   $api.report.getReportClassList(obj).then((res) => {
-    console.log(res)
+    const _res = res;
+    reportList.splice(0, reportList.length)
+    reportList.push(..._res.list)
+    total.value = _res.totalCount
+    if (reportList.length >= total.value) {
+      isFinished.value = true
+    }
+
   })
 }
 
@@ -120,7 +151,8 @@ onMounted(async () => {
   height: 48px;
 
   div:first-child {
-    width: 220px;
+    flex: 1;
+    // width: 220px;
   }
 
   div:last-child {

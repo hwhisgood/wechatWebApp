@@ -9,9 +9,15 @@ export const useUserStore = defineStore({
     loginInfo: {},
     userId: null,
     userName: null,
+    userNo: null,
     avatar: null,
     nickName: null,
   }),
+  getters: {
+    getUserName: (state) => state.userName,
+    getLoginInfo: (state) => state.loginInfo,
+    getUserNo: (state) => state.userNo,
+  },
   actions: {
     Login: function (userInfo) {
       return new Promise((resolve, reject) => {
@@ -20,9 +26,9 @@ export const useUserStore = defineStore({
           .then((res) => {
             setToken(res.token);
             this.token = res.token;
-            this.loginInfo = res.data;
-            this.userId = { res };
-            this.userName = { res };
+            this.userId = res.userId;
+            this.userName = res.userName;
+            this.userNo = res.userNo;
             resolve(res);
           })
           .catch((error) => {

@@ -36,30 +36,68 @@ import {
   Popup,
   Cell,
 } from "vant";
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted, toRef } from "vue";
 import VTable from "@/components/VTable/index.vue";
 import VPagination from "@/components/VPagination/index.vue";
 import SvgIcon from "@/components/SvgIcon/index.vue";
 import searchBlock from './searchBlock/index.vue'
+import $api from "@/api";
+import { useRoute } from "vue-router"
 
-let hasSearch = ref(true); //是否包含查询
-let searchValue = ref("");
-let currentPage = ref(1);
-let isShowPage = ref(false);
-let pageInfo = reactive({
-  pageSize: 10,
-  pageIndex: 1,
+let queryCondition = {} // 组合查询参数
+let sortList = {} // 排序规则
+const option = reactive({}) // 表头项
+const useRouter = useRoute()
+const hasSearch = ref(true); //是否包含查询
+const searchValue = ref("");
+const currentPage = ref(1);
+const isShowPage = ref(false);
+const pageInfo = reactive({
+  limit: 50,
+  page: 1,
 });
-let total = 50; //总条数
+const total = 50; //总条数
 //搜索表单
-const searchformList = [
-  { key: "name", value: "", placeHolder: "请输入诊断名" },
-  { key: "room", value: "", placeHolder: "请输入科室名称" },
-]
+const searchformList = reactive([])
+
+onMounted(() => {
+  getReportDetail()
+})
+// 获取报表详情
+function getReportDetail() {
+  $api.report.getReportDetail({ id: useRouter.query.id }).then((res) => {
+    const _res = res || {}
+    console.log(_res)
+    option.columns = _res.columns
+    if (_res.conditionList && _res.conditionList.length) {
+      searchformList.splice(0, searchformList.length)
+      searchformList.push(..._res.conditionList)
+    } else {
+      getReportExecute()
+    }
+  })
+}
+// 获取报表详情-表格
+function getReportExecute() {
+  let obj = {
+    id: useRouter.query.id,
+    queryCondition,
+    sortList,
+    ...pageInfo
+  }
+  $api.report.getReportExecute(obj).then((res) => {
+    console.log(res)
+  })
+}
 
 // 搜索
 function onSearch(e) {
-  console.log(e)
+  let _queryCondition = {}
+  e.map((item) => {
+    _queryCondition[item.controlName] = item.value
+  })
+  queryCondition = _queryCondition
+  getReportExecute()
 }
 
 // 翻页
@@ -280,115 +318,6 @@ const tableData = [
     one: "我是一",
   },
 ];
-// 表格配置项
-const option = {
-  column: [
-    {
-      label: "房台类型",
-      tableDataprop: "night",
-      sort: true,
-      width: 150,
-    },
-    {
-      label: "已结",
-      tableDataprop: "eight",
-      sort: true,
-      width: 180,
-    },
-    {
-      label: "未收款未收",
-      tableDataprop: "seven",
-      sort: true,
-      width: 150,
-    },
-    {
-      label: "赠送",
-      tableDataprop: "six",
-      sort: true,
-      width: 100,
-    },
-    {
-      label: "五",
-      tableDataprop: "five",
-    },
-    {
-      label: "四个",
-      tableDataprop: "four",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-    {
-      label: "三个",
-      tableDataprop: "three",
-    },
-    {
-      label: "二个",
-      tableDataprop: "two",
-    },
-    {
-      label: "一个",
-      tableDataprop: "one",
-    },
-  ],
-};
 </script>
 
 <style lang="scss" scoped>
