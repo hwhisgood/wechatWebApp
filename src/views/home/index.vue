@@ -3,8 +3,8 @@
     <div class="header-search-box">
       <div>
         <DropdownMenu>
-          <DropdownItem v-model="hospitaKey" :options="hospitaSource" @change="onDropdownItemChange"
-            :title="activeHospitaTitle" />
+          <DropdownItem v-model="activeClass" :options="reportClass" @change="onDropdownItemChange"
+            :title="activeClassTitle" />
         </DropdownMenu>
       </div>
       <Search v-model="searchValue" shape="round" background="#fff" placeholder="数据报表名称输入" class="header-search-input">
@@ -19,38 +19,32 @@
 </template>
 
 <script setup name="Home">
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, watch, reactive, getCurrentInstance } from "vue";
 import { computed } from "@vue/reactivity";
 import { DropdownMenu, DropdownItem, Search, Empty, ConfigProvider } from "vant";
 import CardItem from "./components/CardItem.vue";
 import { useRouter } from "vue-router";
 import $api from "@/api";
 const router = useRouter();
-const searchValue = ref("");
-const activeHospitaTitle = ref("");
-const hospitaSource = [
-  { text: "广州医科大学附属医学院", value: 11 },
-  { text: "广州中医药大学医院", value: 55 },
-  { text: "广义口腔医院", value: 33 },
-];
-const hospitaKey = ref(0);
-const reportList = [
-  { text: "门诊量日报1", id: 0 },
-  { text: "门诊量日报2", id: 1 },
-  { text: "门诊量日报3", id: 2 },
-];
+const internalInstance = getCurrentInstance()
+
+let searchValue = ref("");      // 搜索key值
+let activeClassTitle = ref(""); // 当前分类文案
+let activeClass = ref(null);    // 当前分类选项
+let reportList = reactive([])   // 分类列表
+let reportClass = reactive([])  // 分类
 
 watch(
-  () => hospitaKey.value,
+  () => activeClass.value,
   (val) => {
     let _index = getActiveIndex(val);
-    activeHospitaTitle.value = getActiveTitle(_index);
+    activeClassTitle.value = getActiveTitle(_index);
   }
 );
 
 function getActiveIndex(val) {
   let _index;
-  hospitaSource.find((item, index) => {
+  reportClass.find((item, index) => {
     if (item.value == val) {
       _index = index;
     }
@@ -59,7 +53,7 @@ function getActiveIndex(val) {
 }
 
 function getActiveTitle(index) {
-  return `${hospitaSource[index].text}(${hospitaSource[index].value})`;
+  return `${reportClass[index].name}`;
 }
 
 const themeVars = {
@@ -78,22 +72,44 @@ function goReportDetailPage(id) {
  * 菜单下拉选择
  */
 function onDropdownItemChange(val) {
-  getReportClass();
+  getReportClassList();
 }
 
 /**
  * 获取报表分类
  */
-function getReportClass() {
-  $api.report.getReportClass({ name: null }).then((res) => {
+async function getReportClass() {
+  return $api.report.getReportClass().then((res) => {
+    let _arr = res
+    _arr.forEach((item) => {
+      item.text = item.name;
+      item.value = item.id;
+    })
+    reportClass.splice(0, reportClass.length)
+    reportClass.push(..._arr)
+    activeClass.value = reportClass[0].value;
+  })
+}
+
+/**
+ * 获取报表分类
+ */
+function getReportClassList() {
+  let obj = {
+    classfyId: activeClass.value,
+    isCondition: null,
+    name: null,
+    limit: 10,
+    page: 1,
+  }
+  $api.report.getReportClassList(obj).then((res) => {
     console.log(res)
   })
 }
 
-
-onMounted(() => {
-  hospitaKey.value = hospitaSource[0].value;
-  getReportClass()
+onMounted(async () => {
+  await getReportClass()
+  await getReportClassList()
 });
 </script>
 
