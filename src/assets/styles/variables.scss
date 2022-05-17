@@ -21,8 +21,13 @@ $border-color: #EBEBEB; // 边框颜色
 $border-style: solid; // 边框颜色
 
 /* table专用 */
-$xsa-table-fontSize:14px;
+$xsa-table-fontSize:var(--tableFontSize,14px);
 $xsa-table-color:#333;
+
+
+// :export{
+// 	tableFontSize12:$xsa-table-fontSize;
+// }
 
 /* border 1px */
 @media screen and (-webkit-min-device-pixel-ratio: 2) {

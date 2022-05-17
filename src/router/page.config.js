@@ -23,7 +23,7 @@ export default [
         component: () => import('@/views/reportDetail/index.vue'),
         meta: {
             title: '门诊当日看号量',
-            isNavBar: true
+            isNavBar: false
         }
     },
     {

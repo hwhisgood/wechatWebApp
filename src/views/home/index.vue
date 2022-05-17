@@ -14,8 +14,9 @@
       </form>
     </div>
     <div class="content">
-      <List v-model:loading="isLoading" :finished="isFinished" finished-text="已经到底了" @load="onScrollRefresh">
-        <CardItem v-for="item in reportList" :key="item.id" :cardName="item.name" @click="goReportDetailPage(item.id)">
+      <List v-model:loading="isLoading" :finished="isFinished" finished-text="已经到底了" v-model:error="isError"
+        error-text="请求失败，点击重新加载" :immediate-check="false" @load="onScrollRefresh" offset="500">
+        <CardItem v-for="item in reportList" :key="item.id" :cardName="item.name" @click="goReportDetailPage(item)">
         </CardItem>
       </List>
 
@@ -41,6 +42,8 @@ const reportList = reactive([])   // 分类列表
 const reportClass = reactive([])  // 分类
 const isLoading = ref(false);     // 上拉加载 loading
 const isFinished = ref(false);    // 上拉加载状态确认
+const isError = ref(false);       // 上拉记载错误状态
+
 const pageInfo = reactive({
   limit: 10,
   size: 1
@@ -74,15 +77,15 @@ function getActiveTitle(index) {
 }
 
 const themeVars = {
-  dropdownMenuOptionActiveColor: "green",
-  dropdownMenuTitleActiveTextColor: "green",
+  dropdownMenuOptionActiveColor: "#00CD96",
+  dropdownMenuTitleActiveTextColor: "#00CD96",
 };
 
 /**
  * 跳转到详情页
  */
-function goReportDetailPage(id) {
-  router.push({ path: "reportDetail", query: { id } });
+function goReportDetailPage(item) {
+  router.push({ path: "reportDetail", query: { id: item.id, title: item.name } });
 }
 
 /**
@@ -96,14 +99,16 @@ function onDropdownItemChange(val) {
  *上拉加载
  */
 function onScrollRefresh() {
-
+  isLoading.value = false
+  pageInfo.size += 1
+  getReportClassList()
 }
 
 /**
  * 获取报表分类
  */
-async function getReportClass() {
-  return $api.report.getReportClass().then((res) => {
+function getReportClass() {
+  $api.report.getReportClass().then((res) => {
     let _arr = res
     _arr.forEach((item) => {
       item.text = item.name;
@@ -112,13 +117,15 @@ async function getReportClass() {
     reportClass.splice(0, reportClass.length)
     reportClass.push(..._arr)
     activeClass.value = reportClass[0].value;
+    getReportClassList()
   })
 }
 
 /**
- * 获取报表分类
+ * 获取报表分类列表
  */
 function getReportClassList(name = "") {
+  // isLoading.value = true
   let obj = {
     classfyId: name ? "" : activeClass.value,
     isCondition: null,
@@ -128,19 +135,23 @@ function getReportClassList(name = "") {
   }
   $api.report.getReportClassList(obj).then((res) => {
     const _res = res;
-    reportList.splice(0, reportList.length)
+    // reportList.splice(0, reportList.length)
     reportList.push(..._res.list)
     total.value = _res.totalCount
     if (reportList.length >= total.value) {
       isFinished.value = true
     }
 
+  }).catch(() => {
+    isError.value = true
+  }).finally(() => {
+
   })
 }
 
 onMounted(async () => {
-  await getReportClass()
-  await getReportClassList()
+  getReportClass()
+  // await getReportClassList()
 });
 </script>
 

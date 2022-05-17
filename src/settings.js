@@ -12,7 +12,11 @@ export default {
      */
     isDynamicTitle: false,
     /**
-   * 默认字体大小
-   */
+     * 默认字体大小
+     */
     sysfontSize: 12,
+    /**
+     * 默认字体大小
+     */
+    tableFontSize:"small"
 }

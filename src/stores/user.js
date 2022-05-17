@@ -13,11 +13,6 @@ export const useUserStore = defineStore({
     avatar: null,
     nickName: null,
   }),
-  getters: {
-    getUserName: (state) => state.userName,
-    getLoginInfo: (state) => state.loginInfo,
-    getUserNo: (state) => state.userNo,
-  },
   actions: {
     Login: function (userInfo) {
       return new Promise((resolve, reject) => {

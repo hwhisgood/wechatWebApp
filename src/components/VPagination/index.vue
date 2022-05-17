@@ -19,8 +19,8 @@
 
 <script setup name="VPaginationComponent">
 import { watch } from "vue";
-import { reactive, ref } from "@vue/reactivity";
-import { Popup, Picker } from "vant";
+import { reactive, ref, toRef } from "@vue/reactivity";
+import { Popup, Picker, Toast } from "vant";
 import _ from "lodash";
 import { computed } from "@vue/runtime-core";
 const emits = defineEmits(["preClick", "curPageChange", "nextClick"]);
@@ -39,7 +39,7 @@ const props = defineProps({
   },
   pageSize: {
     type: Number,
-    default: 10,
+    default: 20,
   },
   pageIndex: {
     type: Number,
@@ -49,19 +49,25 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  totalPage: {
+    type: Number,
+    default: 0,
+  },
 });
-let canClickPreBtn = ref(true);
-let canClickNextBtn = ref(false);
-let canClickPageBtn = ref(false);
-let isShowPagePicker = ref(false);
-
-let currentPageIndex = ref(props.curPageIndex); //用来显示的当前页数
-let totalPages = ref(0); // 总页数
-
-let pageTotals = _.floor(_.divide(props.total, props.pageSize)); // 总共页数
-// picker数组
+let canClickPreBtn = ref(true);     // 上一页按钮
+let canClickNextBtn = ref(false);   // 下一页按钮
+let canClickPageBtn = ref(false);   // 选页面按钮
+let isShowPagePicker = ref(false);  // 选页面弹窗
+let currentPageIndex = ref(props.curPageIndex); // 当前页数
+let pageInfo = reactive({
+  pageIndex: props.pageIndex,
+  pageSize: props.pageSize,
+});
+// let pageTotals = _.floor(_.divide(total.value, pageSize.value)); // 总共页数
+// // picker数组
 const columns = computed(() => {
-  let _columns = Array.from(Array(pageTotals), (i, index) => index + 1);
+  let _columns = Array.from(Array(props.totalPage), (i, index) => index + 1);
+  console.log(_columns)
   return _columns;
 });
 
@@ -71,7 +77,7 @@ watch(
     emits("curPageChange", pageInfo);
     if (val <= 1) {
       canClickPreBtn.value = true;
-    } else if (val >= pageTotals) {
+    } else if (val >= props.totalPage) {
       canClickNextBtn.value = true;
       canClickPreBtn.value = false;
     } else {
@@ -81,11 +87,7 @@ watch(
     }
   }
 );
-// 统一页面信息
-let pageInfo = reactive({
-  pageIndex: props.pageIndex,
-  pageSize: props.pageSize,
-});
+
 // 上一页
 function onPreBtnClick() {
   if (pageInfo.pageIndex <= 1) {
@@ -97,9 +99,14 @@ function onPreBtnClick() {
   emits("preClick", pageInfo);
 }
 
+// 下一页
 function onNextBtnClick() {
-  let computedPageIndex = _.floor(_.divide(props.total, props.pageSize));
-  if (pageInfo.pageIndex >= computedPageIndex) {
+  // let computedPageIndex = _.floor(_.divide(props.total, props.pageSize));
+  console.log(pageInfo.pageIndex);
+  console.log(props.totalPage);
+
+  if (pageInfo.pageIndex >= props.totalPage) {
+    Toast('已经是最后一页！')
     return;
   }
   pageInfo.pageIndex++;

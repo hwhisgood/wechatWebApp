@@ -1,10 +1,9 @@
 <template>
-  <div class="v-table" id="VTable" ref="VTable">
+  <div class="v-table">
     <div class="v-header" :style="getHeaderWidth">
       <div v-for="(item, index) in option.columns" :key="index" class="v-header-item"
         :style="{ width: (item.width || cellWidth) + 'px' }">
-        <!-- :style="'width:' + item.width ? item.width : '' + 'px'" -->
-        <span class="v-header-title">{{ item.label }}</span>
+        <span class="v-header-title">{{ item.fieldName }}</span>
         <svg-icon name="Sort" width="20px" height="20px" v-if="item.sort" @click="onSortClick(item)"
           style="margin-left: 10px;">
         </svg-icon>
@@ -16,7 +15,9 @@
         <div v-for="(item, index) in tableData" :key="index" class="v-content-block">
           <div v-for="(context, i) in option.columns" :key="i" class="v-content-item"
             :style="{ width: (context.width || cellWidth) + 'px' }">
-            {{ item[context.tableDataprop] }}
+            <slot name="columns" v-bind="{ item, context }">
+              {{ item[context.fieldName] }}
+            </slot>
           </div>
         </div>
       </div>
@@ -25,15 +26,16 @@
 </template>
 
 <script setup name="VTableComponet">
-import { onMounted, watch, ref } from "vue";
+import { nextTick, onMounted, watch } from "vue";
 import { computed } from "@vue/reactivity";
 import _ from "lodash";
 import waterMark from '@/plugins/waterMaker'
 import { useUserStore } from "@/stores/user";
-const userStore = useUserStore();
+import { useSettingStore } from "@/stores/setting";
 
-const VTable = ref(null)
-const cellWidth = 120;
+const userStore = useUserStore();
+const settingStore = useSettingStore();
+const cellWidth = 135;
 const emits = defineEmits(["sortClick"]);
 const props = defineProps({
   tableData: {
@@ -42,28 +44,51 @@ const props = defineProps({
   },
   option: {
     type: Object,
-    default: {
-      columns: [
-        {
-          label: "", // String
-          props: "", // String
-          sort: false, // Boolean
-          width: 0, // Number
-        },
-      ],
-    },
+    default: () => {
+      // columns: [
+      // {
+      //   label: "", // String
+      //   props: "", // String
+      //   sort: false, // Boolean
+      //   width: 0, // Number
+      // },
+      // ]
+    }
   },
 });
 
+const setFontSize = () => {
+  const fontSize = settingStore.tableFontSize
+  console.log(document.querySelector(".scroll-content"))
+  switch (fontSize) {
+    case 'small':
+      document.querySelector(".v-header").style.setProperty("--tableFontSize", "12px")
+      document.querySelector(".scroll-content").style.setProperty("--tableFontSize", "12px")
+      break;
+    case 'middle':
+      document.querySelector(".v-header").style.setProperty("--tableFontSize", "14px")
+      document.querySelector(".scroll-content").style.setProperty("--tableFontSize", "14px")
+      break;
+    case 'big':
+      document.querySelector(".v-header").style.setProperty("--tableFontSize", "16px")
+      document.querySelector(".scroll-content").style.setProperty("--tableFontSize", "16px")
+      break;
+    default:
+      break;
+  }
+}
+
 onMounted(() => {
+  nextTick(() => setFontSize())
+  if (!props.tableData.length) return;
   getHeaderWidth();
   warterMakerInit();
 });
 
 const getContentHeight = computed(() => {
   if (!props.tableData.length) return ''
-  let height = _.multiply(props.tableData.length, 40);
-  return height + 350
+  let height = _.multiply(props.tableData.length,44);
+  return height 
 })
 /**
  * 水印初始化
@@ -74,7 +99,7 @@ function warterMakerInit() {
       parentDomName: '.v-content', // 父节点dom选择器名字
       show: true, // 水印开关
       color: 'rgba(0, 0, 0, 0.1)', // 水印色值
-      title: `${userStore.getUserName}(${userStore.getUserNo})`, // 显示的水印文本
+      title: `${userStore.userName}(${userStore.userNo})`, // 显示的水印文本
       width: 200, // 水印宽高
       height: 150,
       fontNum: 16, // 水印字体大小
@@ -87,13 +112,13 @@ function warterMakerInit() {
  * 获取头部宽度
  */
 function getHeaderWidth() {
-  let widthArray = props.option.columns.map((item) => {
+  let widthArray = props.option.columns && props.option.columns.length && props.option.columns.map((item) => {
     return item.width ? item.width : cellWidth;
   });
   return `${_.sum(widthArray)}`;
 }
 /**
- * 暴露头部点击时间
+ * 暴露头部点击事件
  * @param {*} item 
  */
 function onSortClick(item) {
@@ -102,11 +127,16 @@ function onSortClick(item) {
 </script>
 
 <style lang="scss" scoped>
+:root {
+  --tableFontSize: 12px;
+}
+
 .v-table {
   height: 100%;
   overflow-x: auto;
   overflow-y: hidden;
   position: relative;
+  font-size: var(--tableFontSize, 12px);
 }
 
 .v-header {
@@ -123,8 +153,10 @@ function onSortClick(item) {
 
   &-title {
     color: $xsa-table-color;
-    font-size: $xsa-table-fontSize;
+    font-size: var(--tableFontSize, 12px);
+    // font-size: $xsa-table-fontSize;
   }
+
 
   &-item {
     box-sizing: border-box;
@@ -142,7 +174,7 @@ function onSortClick(item) {
   position: absolute;
   top: 40px;
   left: 0;
-  height: 100%;
+  height: 100vh;
   overflow-x: scroll;
   overflow-y: auto;
   margin-bottom: 50px;
@@ -167,7 +199,8 @@ function onSortClick(item) {
   &-item {
     box-sizing: border-box;
     padding: 0 6px;
-    font-size: $xsa-table-fontSize;
+    font-size: var(--tableFontSize, 12px);
+    // font-size: $xsa-table-fontSize;
     min-width: 100px;
     border: $border-default;
     border-top: 0;
