@@ -1,13 +1,4 @@
 export default [
-    // {
-    //     name: 'msg',
-    //     path: '/msg',
-    //     component: () => import('@/views/msg/index.vue'),
-    //     meta: {
-    //         title: '消息',
-    //         icon: 'chat-o'
-    //     }
-    // },
     {
         name: 'home',
         path: '/home',
