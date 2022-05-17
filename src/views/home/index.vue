@@ -15,7 +15,7 @@
     </div>
     <div class="content">
       <List v-model:loading="isLoading" :finished="isFinished" finished-text="已经到底了" v-model:error="isError"
-        error-text="请求失败，点击重新加载" :immediate-check="false" @load="onScrollRefresh" offset="500">
+        error-text="请求失败，点击重新加载" :immediate-check="false" @load="onScrollRefresh" offset="1">
         <CardItem v-for="item in reportList" :key="item.id" :cardName="item.name" @click="goReportDetailPage(item)">
         </CardItem>
       </List>
@@ -43,7 +43,10 @@ const reportClass = reactive([])  // 分类
 const isLoading = ref(false);     // 上拉加载 loading
 const isFinished = ref(false);    // 上拉加载状态确认
 const isError = ref(false);       // 上拉记载错误状态
-
+const themeVars = {
+  dropdownMenuOptionActiveColor: "#00CD96",
+  dropdownMenuTitleActiveTextColor: "#00CD96",
+};
 const pageInfo = reactive({
   limit: 10,
   size: 1
@@ -76,11 +79,6 @@ function getActiveTitle(index) {
   return `${reportClass[index].name}`;
 }
 
-const themeVars = {
-  dropdownMenuOptionActiveColor: "#00CD96",
-  dropdownMenuTitleActiveTextColor: "#00CD96",
-};
-
 /**
  * 跳转到详情页
  */
@@ -99,7 +97,7 @@ function onDropdownItemChange(val) {
  *上拉加载
  */
 function onScrollRefresh() {
-  isLoading.value = false
+  // isLoading.value = false
   pageInfo.size += 1
   getReportClassList()
 }
@@ -145,7 +143,7 @@ function getReportClassList(name = "") {
   }).catch(() => {
     isError.value = true
   }).finally(() => {
-
+    isLoading.value = false
   })
 }
 

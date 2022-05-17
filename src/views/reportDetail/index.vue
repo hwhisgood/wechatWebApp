@@ -2,7 +2,7 @@
   <div class="reportDetail">
     <NavBar :title="route.query.title ? route.query.title : route.meta.title" left-text="返回" left-arrow
       @click-left="onClickLeft" @click-right="onClickRight" right-text="刷新" />
-      
+
     <div class="search-block" v-if="searchformList.length">
       <searchBlock :formList="searchformList" @onSubmit="onSearch"></searchBlock>
     </div>
@@ -123,8 +123,6 @@ function getReportExecute() {
     tableData.push(..._res.list)
     total.value = _res.totalCount
     totalPage.value = _res.totalPage
-    console.log(total.value)
-    console.log(totalPage.value)
   })
 }
 
