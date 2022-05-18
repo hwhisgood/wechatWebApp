@@ -1,6 +1,6 @@
 <template>
     <div class="cardItem">
-        <div class="cardName">
+        <div class="cardName ellipsis-lines">
             {{ cardName }}
         </div>
     </div>

@@ -15,12 +15,16 @@
     </div>
     <div class="content">
       <List v-model:loading="isLoading" :finished="isFinished" finished-text="已经到底了" v-model:error="isError"
-        error-text="请求失败，点击重新加载" :immediate-check="false" @load="onScrollRefresh" offset="1">
+        error-text="请求失败，点击重新加载" :immediate-check="false" @load="onScrollRefresh" offset="0">
         <CardItem v-for="item in reportList" :key="item.id" :cardName="item.name" @click="goReportDetailPage(item)">
         </CardItem>
       </List>
 
-      <Empty v-if="!reportList.length" mage-size="100" description="描述文字" />
+      <Empty v-if="!reportList.length" image-size="64px" description="搜索为空" class="empty-class">
+        <template #image>
+          <svg-icon name="icon_nothing" width="64px" height="64px"> </svg-icon>
+        </template>
+      </Empty>
     </div>
   </ConfigProvider>
 </template>
@@ -62,6 +66,7 @@ watch(
 
 function onSearch() {
   pageInfo.size = 1;
+  reportList.splice(0, reportList.length)
   getReportClassList(searchValue.value)
 }
 
@@ -97,7 +102,6 @@ function onDropdownItemChange(val) {
  *上拉加载
  */
 function onScrollRefresh() {
-  // isLoading.value = false
   pageInfo.size += 1
   getReportClassList()
 }
@@ -123,7 +127,6 @@ function getReportClass() {
  * 获取报表分类列表
  */
 function getReportClassList(name = "") {
-  // isLoading.value = true
   let obj = {
     classfyId: name ? "" : activeClass.value,
     isCondition: null,
@@ -133,7 +136,6 @@ function getReportClassList(name = "") {
   }
   $api.report.getReportClassList(obj).then((res) => {
     const _res = res;
-    // reportList.splice(0, reportList.length)
     reportList.push(..._res.list)
     total.value = _res.totalCount
     if (reportList.length >= total.value) {

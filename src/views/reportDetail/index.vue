@@ -7,9 +7,9 @@
       <searchBlock :formList="searchformList" @onSubmit="onSearch"></searchBlock>
     </div>
 
-    <Cell v-if="tableData.length">
+    <Cell v-if="tableData.length && refreshTime">
       <template #title>
-        <span class="updateTime">最近更新时间：2022年2月10号 11点01分</span>
+        <span class="updateTime">最近更新时间： {{ refreshTime }}</span>
       </template>
     </Cell>
 
@@ -18,9 +18,17 @@
         <template v-slot:columns="scoped">
           <span>{{ dealColumns(scoped) }}</span>
         </template>
-        <Loading type="spinner" color="#00CD96" v-if="!tableData.length"> 加载中...</Loading>
       </VTable>
     </div>
+
+    <!-- <Loading type="spinner" color="#00CD96" v-if="isLoading" class="empty-class"> 加载中...
+    </Loading> -->
+
+    <Empty v-if="!tableData.length && !isLoading" image-size="64px" description="搜索为空" class="empty-class">
+      <template #image>
+        <svg-icon name="icon_nothing" width="64px" height="64px"> </svg-icon>
+      </template>
+    </Empty>
     <div class="footer-block" v-if="total">
       <VPagination @curPageChange="onCurPageChange" :pageSize="pageInfo.pageSize" :pageIndex="pageInfo.pageIndex"
         :total="total" :totalPage="totalPage"></VPagination>
@@ -41,7 +49,8 @@ import {
   Cell,
   NavBar,
   Toast,
-  Loading
+  Loading,
+  Empty
 } from "vant";
 import { ref, reactive, onMounted, toRef } from "vue";
 import VTable from "@/components/VTable/index.vue";
@@ -50,23 +59,27 @@ import SvgIcon from "@/components/SvgIcon/index.vue";
 import searchBlock from './searchBlock/index.vue'
 import $api from "@/api";
 import { useRoute, useRouter } from "vue-router"
+import dayjs from "dayjs"
 
-let queryCondition = {} // 组合查询参数
-let sortList = {} // 排序规则
-const option = reactive({}) // 表头项
-const tableData = reactive([]) // 表头项
+let queryCondition = {}        // 组合查询参数
+let sortList = {}              // 排序规则
+let sortListMap = reactive([]) // 排序表头映射对象
+const option = reactive({})    // 表头项
+const tableData = reactive([]) // 表格数据项
 const route = useRoute()
 const router = useRouter()
-const hasSearch = ref(true); //是否包含查询
+const hasSearch = ref(true);   // 是否包含查询
 const searchValue = ref("");
 const currentPage = ref(1);
+const refreshTime = ref(null); // 刷新时间
+const isLoading = ref(false);
 const isShowPage = ref(false);
 const pageInfo = reactive({
   limit: 20,
   page: 1,
 });
-const total = ref(0); //总条数
-const totalPage = ref(0); //总条数
+const total = ref(0);          // 总条数
+const totalPage = ref(0);      // 总页数
 
 //搜索表单
 const searchformList = reactive([])
@@ -74,28 +87,44 @@ const searchformList = reactive([])
 onMounted(() => {
   getReportDetail()
 })
+
+// 处理表格字段
 function dealColumns(scoped) {
   let _item = scoped.item;
   let _context = scoped.context;
   let _value = _item[_context.fieldName]
-
-  switch (_context.fieldName) {
-    case '配置':
-      return '11'
-    default:
-      return _value
+  if (_context.fieldName == "配置") {
+    return '配置我还没处理'
+  } else if (_context.fieldType === 1) {
+    return dayjs(_value).format('YYYY-MM-DD')
+  } else {
+    return _value
   }
 }
 
+// 排序
+function onSortClick({ item, index }) {
+  let _sortListMap = sortListMap.length && sortListMap[index]
+  let sortItem = _sortListMap && _sortListMap.dsList[0]
+  if (!sortItem) return console.error('无排序对象')
+  sortList[sortItem.dsId] = [{ fieldName: sortItem.fieldName, asc: item.asc }]
+  getReportExecute()
+}
+
+// nav 左侧按钮
 function onClickLeft() {
   router.go(-1);
 }
+
+// nav 右侧按钮
 function onClickRight() {
   pageInfo.page = 1
   getReportDetail()
 }
+
 // 获取报表详情
 function getReportDetail() {
+  isLoading.value = true
   $api.report.getReportDetail({ id: route.query.id }).then((res) => {
     const _res = res || {}
     option.columns = _res.columns && JSON.parse(_res.columns)
@@ -107,10 +136,14 @@ function getReportDetail() {
     }
   }).catch(() => {
     Toast({ message: '刷新失败', position: 'bottom' })
+  }).finally(() => {
+    isLoading.value = false
   })
 }
+
 // 获取报表详情-表格
 function getReportExecute() {
+  isLoading.value = true
   let obj = {
     id: route.query.id,
     queryCondition,
@@ -123,6 +156,12 @@ function getReportExecute() {
     tableData.push(..._res.list)
     total.value = _res.totalCount
     totalPage.value = _res.totalPage
+    console.log(_res.refreshTime)
+    refreshTime.value = dayjs(_res.refreshTime).format('YYYY[年]MM[月]DD[日] HH[时]mm[分]');
+    console.log(refreshTime)
+    sortListMap = _res.columns
+  }).finally(() => {
+    isLoading.value = false
   })
 }
 
@@ -142,10 +181,6 @@ function onCurPageChange(pageParams) {
   getReportExecute()
 }
 
-// 排序
-function onSortClick(e) {
-  console.log(e);
-}
 
 // 获取数据
 function getReportList() { }

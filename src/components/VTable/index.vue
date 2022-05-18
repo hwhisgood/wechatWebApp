@@ -4,7 +4,7 @@
       <div v-for="(item, index) in option.columns" :key="index" class="v-header-item"
         :style="{ width: (item.width || cellWidth) + 'px' }">
         <span class="v-header-title">{{ item.fieldName }}</span>
-        <svg-icon name="Sort" width="20px" height="20px" v-if="item.sort" @click="onSortClick(item)"
+        <svg-icon name="Sort" width="20px" height="20px" @click="onSortClick({ item, index })"
           style="margin-left: 10px;">
         </svg-icon>
       </div>
@@ -13,7 +13,7 @@
     <div class="scroll-content">
       <div class="v-content" :style="`width:${getHeaderWidth}px;height:${getContentHeight}px`">
         <div v-for="(item, index) in tableData" :key="index" class="v-content-block">
-          <div v-for="(context, i) in option.columns" :key="i" class="v-content-item"
+          <div v-for="(context, i) in option.columns" :key="i" class="v-content-item ellipsis-lines"
             :style="{ width: (context.width || cellWidth) + 'px' }">
             <slot name="columns" v-bind="{ item, context }">
               {{ item[context.fieldName] }}
@@ -44,22 +44,12 @@ const props = defineProps({
   },
   option: {
     type: Object,
-    default: () => {
-      // columns: [
-      // {
-      //   label: "", // String
-      //   props: "", // String
-      //   sort: false, // Boolean
-      //   width: 0, // Number
-      // },
-      // ]
-    }
+    default: () => { }
   },
 });
 
 const setFontSize = () => {
   const fontSize = settingStore.tableFontSize
-  console.log(document.querySelector(".scroll-content"))
   switch (fontSize) {
     case 'small':
       document.querySelector(".v-header").style.setProperty("--tableFontSize", "12px")
@@ -87,8 +77,8 @@ onMounted(() => {
 
 const getContentHeight = computed(() => {
   if (!props.tableData.length) return ''
-  let height = _.multiply(props.tableData.length,44);
-  return height 
+  let height = _.multiply(props.tableData.length, 44);
+  return height
 })
 /**
  * 水印初始化
@@ -121,8 +111,10 @@ function getHeaderWidth() {
  * 暴露头部点击事件
  * @param {*} item 
  */
-function onSortClick(item) {
-  emits("sortClick", item);
+function onSortClick({ item, index }) {
+  // 手动添加排序
+  item.asc = ('asc') in item ? !item.asc : false
+  emits("sortClick", { item, index });
 }
 </script>
 
@@ -149,12 +141,10 @@ function onSortClick(item) {
   height: 40px;
   line-height: 40px;
   box-sizing: border-box;
-  // box-shadow: 0px 10px 5px #888888;
 
   &-title {
     color: $xsa-table-color;
     font-size: var(--tableFontSize, 12px);
-    // font-size: $xsa-table-fontSize;
   }
 
 
@@ -187,9 +177,8 @@ function onSortClick(item) {
   &-block {
     font-size: medium;
     display: flex;
-    height: 40px;
-    line-height: 40px;
-    background-color: #fff;
+
+background-color: #fff;
   }
 
   &-block:nth-child(2n) {
@@ -200,9 +189,10 @@ function onSortClick(item) {
     box-sizing: border-box;
     padding: 0 6px;
     font-size: var(--tableFontSize, 12px);
-    // font-size: $xsa-table-fontSize;
     min-width: 100px;
     border: $border-default;
+    min-height: 40px;
+    // line-height: 40px;
     border-top: 0;
     border-right: 0;
   }

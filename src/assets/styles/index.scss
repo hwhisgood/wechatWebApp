@@ -86,3 +86,18 @@ table {
   .app-footer {}
 
 }
+
+// 多行溢出隐藏
+.ellipsis-lines {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2; // 行数
+  overflow: hidden;
+}
+
+.empty-class {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

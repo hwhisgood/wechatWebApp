@@ -7,12 +7,12 @@ import svgIcon from "@/components/SvgIcon/index.vue";
 import "amfe-flexible/index.js";
 import "./permission";
 import Fastclick from "fastclick";
-import { setupWechatAuth } from '@/configs/wechatAuth'
+// import { setupWechatAuth } from '@/configs/wechatAuth' // 微信授权
 
 Fastclick(document.body)
 const app = createApp(App);
 
-setupWechatAuth(app)
+// setupWechatAuth(app)
 app.use(createPinia());
 app.use(router);
 app.component("svg-icon", svgIcon);
