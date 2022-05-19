@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Toast } from 'vant';
 import { getToken, removeToken } from './auth';
+import router from '@/router';
 
 // 配置新建一个 axios 实例
 const service = axios.create({
@@ -34,8 +35,7 @@ service.interceptors.response.use(
         if (res.code === 0) {
             return response.data;
         } else {
-            // removeToken();
-            // window.location.href = '/login'; // 去登录页
+            removeToken();
             return Promise.reject(res);
         }
     },

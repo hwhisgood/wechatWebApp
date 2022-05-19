@@ -1,5 +1,14 @@
 export default [
     {
+        name: 'adPage',
+        path: '/adPage',
+        component: () => import('@/views/adPage/index.vue'),
+        meta: {
+            title: '',
+            isNavBar: false
+        }
+    },
+    {
         name: 'reportDetail',
         path: '/reportDetail',
         component: () => import('@/views/reportDetail/index.vue'),

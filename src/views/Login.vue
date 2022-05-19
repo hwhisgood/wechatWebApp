@@ -49,7 +49,7 @@ function onLogin(params) {
       // window.location.href = vueWechatAuth.authUrl
 
       // 登陆成功跳转
-      router.push({ path: "/" });
+      router.push({ path: "/home" });
     }).catch((err) => {
       Toast({ message: err.msg, duration: 1000, position: 'bottom' })
     });

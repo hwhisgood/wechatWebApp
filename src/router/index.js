@@ -7,24 +7,35 @@ import MainLayout from '@/layout/main.vue'
 import PageLayout from '@/layout/page.vue'
 
 
+
 const router = createRouter({
   history: createWebHashHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '',
+      path: '/',
+      // component: MainLayout,
+      redirect: PageLayout[0] || '/adPage',
+    }, 
+    {
+      path: '/home',
       component: MainLayout,
       redirect: navbarConfig[0] || '/home',
       children: navbarConfig
     }, 
     {
-      path: '',
+      path: '/home',
       component: PageLayout,
-      children: pageConfig
+      children: pageConfig,
     }, 
     {
       name: 'login',
       path: '/login',
-      component: () => import("@/views/Login.vue")
+      component: () => import("@/views/Login.vue"),
+      // beforeEnter: (to, from) => {
+        
+      //   // reject the navigation
+      //   return false
+      // },
     }]
 })
 
