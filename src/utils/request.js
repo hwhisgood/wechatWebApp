@@ -35,7 +35,7 @@ service.interceptors.response.use(
         if (res.code === 0) {
             return response.data;
         } else {
-            removeToken();
+            // removeToken();
             return Promise.reject(res);
         }
     },
