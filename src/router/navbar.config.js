@@ -9,7 +9,7 @@ export default [
                 active: "icon_home_pre",
                 inactive: "icon_home_nor"
             },
-            // isNavBar: false
+            isNavBar: false
         }
     },
     {
@@ -21,8 +21,9 @@ export default [
             icon: {
                 active: "icon_profile_pre",
                 inactive: "icon_profile_nor"
-
             },
+            isNavBar: false
+
         }
     }
 ]

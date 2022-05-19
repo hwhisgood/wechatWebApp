@@ -11,7 +11,7 @@
         <TabbarItem v-for="item in NavBarConfig" :key="item.name" :name="item.path">
           {{ item.meta.title }}
           <template #icon="props">
-            <svg-icon :name="props.active ? item.meta.icon.active : item.meta.icon.inactive" width="32px" height="32px">
+            <svg-icon :name="props.active ? item.meta.icon.active : item.meta.icon.inactive" width="26px" height="26px">
             </svg-icon>
           </template>
         </TabbarItem>

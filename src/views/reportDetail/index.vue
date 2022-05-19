@@ -16,7 +16,7 @@
     <div class="table-block" v-if="tableData.length">
       <VTable :option="option" :tableData="tableData" @sortClick="onSortClick">
         <template v-slot:columns="scoped">
-          <span>{{ dealColumns(scoped) }}</span>
+          <span class="ellipsis-lines">{{ dealColumns(scoped) }}</span>
         </template>
       </VTable>
     </div>
